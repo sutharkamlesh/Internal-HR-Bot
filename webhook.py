@@ -5,8 +5,6 @@ import utils
 
 from flask import Flask
 from flask import request, make_response
-from pymongo import MongoClient
-from bson.objectid import ObjectId
 
 # Flask app should start in global layout
 app = Flask(__name__)
@@ -80,8 +78,7 @@ def process_request(req):
                     {
                         "text": {
                             "text": [
-                                "Okay, I will request your manager to grant you a leave from " +
-                                utils.date2text(start_date) + " to " + utils.date2text(end_date)
+                                "Your Salary Slips are on your way. Please check your mail."
                             ]
                         },
                         "platform": "FACEBOOK"
