@@ -19,13 +19,7 @@ def send_mail(to_email, subject, body):
 
     # Authentication
     s.login("kamlesh.suthar@techmatters.com", "fall0_40c")
-    message = """\
-    From: kamlesh.suthar@techmatters.com
-    To: {0}
-    Subject: {1}
-    
-    {2}
-    """.format(to_email, subject, body)
+    message = """\\nFrom: kamlesh.suthar@techmatters.com\nTo: {0}\nSubject: {1}\n\n{2}""".format(to_email, subject, body)
     # sending the mail
     s.sendmail("kamlesh.suthar@techmatters.com", to_email, message)
     # terminating the session
