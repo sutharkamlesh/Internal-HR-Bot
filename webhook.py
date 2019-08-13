@@ -8,12 +8,6 @@ from flask import request, make_response
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-MONGODB_URI = "MONGO_DATABASE_URL"
-client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
-db = client.aflatoun
-questions = db.questions
-
-
 # Flask app should start in global layout
 app = Flask(__name__)
 
@@ -56,6 +50,30 @@ def process_request(req):
         elif action == "request.vacation":
             start_date = req.get("queryResult").get("parameters").get("date-period").get("startDate")
             end_date = req.get("queryResult").get("parameters").get("date-period").get("endDate")
+            return {
+                "source": "webhook",
+                "fulfillmentMessages": [
+                    {
+                        "text": {
+                            "text": [
+                                "Okay, I will request your manager to grant you a leave from " +
+                                utils.date2text(start_date) + " to " + utils.date2text(end_date)
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    }
+                ],
+            }
+
+        elif action == "ProvideSalarySlips.TakeEmailAddress":
+            to_email = req.get("queryResult").get("parameters").get("email")
+            start_date = req.get("queryResult").get("parameters").get("date-period").get("startDate")
+            end_date = req.get("queryResult").get("parameters").get("date-period").get("endDate")
+            subject = "Salary Slips"
+            body = "This is mail to provide a salary slips from " + utils.date2text(start_date) + " to " + \
+                   utils.date2text(end_date)
+            utils.send_mail(to_email, subject, body)
+
             return {
                 "source": "webhook",
                 "fulfillmentMessages": [
