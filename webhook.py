@@ -1,12 +1,12 @@
 import json
 import os
 import traceback
+import utils
 
 from flask import Flask
 from flask import request, make_response
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-
 
 MONGODB_URI = "MONGO_DATABASE_URL"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
@@ -35,6 +35,23 @@ def process_request(req):
 
         if action == "input.welcome":
             print("Webhook Successfully connected.")
+
+        elif action == "request.leave":
+            date_string = req.get("queryResult").get("parameters").get("date")
+            return {
+                "source": "webhook",
+                "fulfillmentMessages": [
+                    {
+                        "text": {
+                            "text": [
+                                "Okay, I will inform your manager that you are not going to come on " +
+                                utils.date2text(date_string)
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    }
+                ],
+            }
 
     except Exception as e:
         print("Error:", e)
