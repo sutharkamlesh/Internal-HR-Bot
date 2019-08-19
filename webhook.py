@@ -98,21 +98,20 @@ def process_request(req):
             parameters = req.get("queryResult").get("parameters")
             designation = parameters.get('designation')
             department = parameters.get('department')
+            contact_info = None
             if designation and department:
                 contact_info = employee_details.find_one({
-                    'designation': parameters.get('designation'),
-                    'department': parameters.get('department')
+                    'designation': designation,
+                    'department': department
                 })
             elif designation:
                 contact_info = employee_details.find_one({
-                    'designation': parameters.get('designation')
+                    'designation': designation
                 })
             elif department:
                 contact_info = employee_details.find_one({
-                    'department': parameters.get('department')
+                    'department': department
                 })
-            else:
-                contact_info = None
 
             if contact_info:
                 return {
