@@ -5,6 +5,14 @@ import utils
 
 from flask import Flask
 from flask import request, make_response
+from pymongo import MongoClient
+
+
+MONGODB_URI = "mongodb+srv://kamlesh:techmatters123@aflatoun-quiz-pflgi.mongodb.net/test?retryWrites=true&w=majority"
+client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
+db = client.hrchatbot
+employee_details = db.employee_details
+
 
 # Flask app should start in global layout
 app = Flask(__name__)
@@ -85,6 +93,57 @@ def process_request(req):
                     }
                 ],
             }
+
+        elif action == "find.colleague":
+            parameters = req.get("queryResult").get("parameters")
+            if "designation" in parameters.keys() and "department" in parameters.keys():
+                contact_info = employee_details.find_one({
+                    'designation': parameters.get('designation'),
+                    'department': parameters.get('department')
+                })
+            elif "designation" in parameters.keys():
+                contact_info = employee_details.find_one({
+                    'designation': parameters.get('designation')
+                })
+            elif "department" in parameters.keys():
+                contact_info = employee_details.find_one({
+                    'department': parameters.get('department')
+                })
+            else:
+                contact_info = None
+
+            if contact_info is not None:
+                return {
+                    "source": "webhook",
+                    "fulfillmentMessages": [
+                        {
+                            "text": {
+                                "text": [
+                                    "You can talk to {0} who is working as {1} in {2} department of this "
+                                    "firm.\nContact: {3}".format(contact_info.get('name'),
+                                                                 contact_info.get('designation'),
+                                                                 contact_info.get('department'),
+                                                                 contact_info.get('contact_number'))
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        }
+                    ],
+                }
+            else:
+                return {
+                    "source": "webhook",
+                    "fulfillmentMessages": [
+                        {
+                            "text": {
+                                "text": [
+                                    "Sorry we don't have any information regarding this."
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        }
+                    ]
+                }
 
     except Exception as e:
         print("Error:", e)
