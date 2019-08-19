@@ -96,23 +96,25 @@ def process_request(req):
 
         elif action == "find.colleague":
             parameters = req.get("queryResult").get("parameters")
-            if "designation" in parameters.keys() and "department" in parameters.keys():
+            designation = parameters.get('designation')
+            department = parameters.get('department')
+            if designation and department:
                 contact_info = employee_details.find_one({
                     'designation': parameters.get('designation'),
                     'department': parameters.get('department')
                 })
-            elif "designation" in parameters.keys():
+            elif designation:
                 contact_info = employee_details.find_one({
                     'designation': parameters.get('designation')
                 })
-            elif "department" in parameters.keys():
+            elif department:
                 contact_info = employee_details.find_one({
                     'department': parameters.get('department')
                 })
             else:
                 contact_info = None
 
-            if contact_info is not None:
+            if contact_info:
                 return {
                     "source": "webhook",
                     "fulfillmentMessages": [
