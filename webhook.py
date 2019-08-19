@@ -100,20 +100,25 @@ def process_request(req):
             department = parameters.get('department')
             contact_info = None
             if designation and department:
+                print("designation and department")
                 contact_info = employee_details.find_one({
                     'designation': designation,
                     'department': department
                 })
             elif designation:
+                print("designation")
                 contact_info = employee_details.find_one({
                     'designation': designation
                 })
             elif department:
+                print("department")
                 contact_info = employee_details.find_one({
                     'department': department
                 })
 
             if contact_info:
+                print("Contact info found")
+                print(contact_info)
                 return {
                     "source": "webhook",
                     "fulfillmentMessages": [
@@ -132,6 +137,8 @@ def process_request(req):
                     ],
                 }
             else:
+                print("Contact info not found")
+                print(contact_info)
                 return {
                     "source": "webhook",
                     "fulfillmentMessages": [
