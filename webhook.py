@@ -6,6 +6,7 @@ import utils
 from flask import Flask
 from flask import request, make_response
 from pymongo import MongoClient
+from textblob import TextBlob
 
 MONGODB_URI = "mongodb+srv://kamlesh:techmatters123@aflatoun-quiz-pflgi.mongodb.net/test?retryWrites=true&w=majority"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
@@ -118,6 +119,33 @@ def process_request(req):
                                                 contact_info.get('contact_number'))
             else:
                 message = "Sorry we don't have any information regarding this."
+
+            return {
+                "source": "webhook",
+                "fulfillmentMessages": [
+                    {
+                        "text": {
+                            "text": [
+                                message
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    }
+                ],
+            }
+
+        elif action == "Feedback.Feedback-custom":
+            feedback = req.get("queryResult").get("parameters").get('feedback')
+            text = TextBlob(feedback)
+            sentiment = text.sentiment.polarity
+            subjective = text.sentiment.subjectivity
+
+            if sentiment >= 0.3:
+                message = f"Good to here that.\nSentiment Score: {sentiment}"
+            elif sentiment <= -0.3:
+                message = f"Sorry to here that.\nSentiment Score: {sentiment}"
+            else:
+                message = "Alright, I have noted the feedback."
 
             return {
                 "source": "webhook",
