@@ -11,12 +11,14 @@ itsdangerous==1.1.0
 jedi==0.15.1
 Jinja2==2.10.1
 MarkupSafe==1.1.1
+nltk==3.4.5
 parso==0.5.1
 pickleshare==0.7.5
 prompt-toolkit==2.0.9
 Pygments==2.4.2
 pymongo==3.8.0
 six==1.12.0
+textblob==0.15.3
 traitlets==4.3.2
 wcwidth==0.1.7
 Werkzeug==0.15.5
