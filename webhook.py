@@ -7,12 +7,10 @@ from flask import Flask
 from flask import request, make_response
 from pymongo import MongoClient
 
-
 MONGODB_URI = "mongodb+srv://kamlesh:techmatters123@aflatoun-quiz-pflgi.mongodb.net/test?retryWrites=true&w=majority"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
 db = client.hrchatbot
 employee_details = db.employee_details
-
 
 # Flask app should start in global layout
 app = Flask(__name__)
@@ -23,7 +21,6 @@ def webhook():
     req = request.get_json(silent=True, force=True)
     res = process_request(req)
     res = json.dumps(res, indent=4)
-    # print(res)
     r = make_response(res)
     r.headers['Content-Type'] = 'application/json'
     return r
@@ -114,37 +111,27 @@ def process_request(req):
                 })
 
             if contact_info:
-                return {
-                    "source": "webhook",
-                    "fulfillmentMessages": [
-                        {
-                            "text": {
-                                "text": [
-                                    "You can talk to {0} who is working as {1} in {2} department of this "
-                                    "firm.\nContact: {3}".format(contact_info.get('name'),
-                                                                 contact_info.get('designation'),
-                                                                 contact_info.get('department'),
-                                                                 contact_info.get('contact_number'))
-                                ]
-                            },
-                            "platform": "FACEBOOK"
-                        }
-                    ],
-                }
+                message = "You can talk to {0} who is working as {1} in {2} department of this firm.\n" \
+                          "Contact: {3}".format(contact_info.get('name'),
+                                                contact_info.get('designation'),
+                                                contact_info.get('department'),
+                                                contact_info.get('contact_number'))
             else:
-                return {
-                    "source": "webhook",
-                    "fulfillmentMessages": [
-                        {
-                            "text": {
-                                "text": [
-                                    "Sorry we don't have any information regarding this."
-                                ]
-                            },
-                            "platform": "FACEBOOK"
-                        }
-                    ]
-                }
+                message = "Sorry we don't have any information regarding this."
+
+            return {
+                "source": "webhook",
+                "fulfillmentMessages": [
+                    {
+                        "text": {
+                            "text": [
+                                message
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    }
+                ],
+            }
 
     except Exception as e:
         print("Error:", e)
