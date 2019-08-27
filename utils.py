@@ -24,3 +24,12 @@ def send_mail(to_email, subject, body):
     s.sendmail("kamlesh.suthar@techmatters.com", to_email, message)
     # terminating the session
     s.quit()
+
+
+def batch_update_entities(project_id, entity_type, entities):
+    """Create an entity type with the given display name."""
+    import dialogflow_v2 as dialogflow
+    client = dialogflow.EntityTypesClient()
+    parent = client.entity_type_path(project_id, entity_type)
+    response = client.batch_create_entities(parent, entities)
+    print("Entities Updated: \n{}".format(response))
