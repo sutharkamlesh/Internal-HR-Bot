@@ -94,22 +94,9 @@ def process_request(req):
 
         elif action == "find.colleague":
             parameters = req.get("queryResult").get("parameters")
-            designation = parameters.get('designation')
-            department = parameters.get('department')
-            contact_info = None
-            if designation and department:
-                contact_info = employee_details.find_one({
-                    'designation': designation,
-                    'department': department
-                })
-            elif designation:
-                contact_info = employee_details.find_one({
-                    'designation': designation
-                })
-            elif department:
-                contact_info = employee_details.find_one({
-                    'department': department
-                })
+            filtered_parameters = {key: val for key, val in parameters.items()
+                                   if val != ''}    # Removing empty parameters
+            contact_info = employee_details.find_one(filtered_parameters)
 
             if contact_info:
                 message = "You can talk to {0} who is working as {1} in {2} department of this firm.\n" \
@@ -118,7 +105,7 @@ def process_request(req):
                                                 contact_info.get('department'),
                                                 contact_info.get('contact_number'))
             else:
-                message = "Sorry we don't have any information regarding this."
+                message = "Sorry, I was not able to find the given person."
 
             return {
                 "source": "webhook",
@@ -155,6 +142,40 @@ def process_request(req):
                         "text": {
                             "text": [
                                 message
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    }
+                ],
+            }
+
+        elif action == "search_employee":
+            parameters = req.get("queryResult").get("parameters")
+            contact_info = employee_details.find_one(parameters)
+
+            return {
+                "source": "webhook",
+                "fulfillmentMessages": [
+                    {
+                        "card": {
+                            "title": contact_info.get("name"),
+                            "subtitle": contact_info.get('designation') + " | " + contact_info.get('department')
+                            "imageUri": "https://banner2.kisspng.com/20180403/tkw/kisspng-avatar-computer-icons-user"
+                                        "-profile-business-user-avatar-5ac3a1f7d96614.9721182215227704238905.jpg",
+                            "buttons": [
+                                {
+                                    "text": "View Profile"
+                                }
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    },
+                    {
+                        "quickReplies": {
+                            "title": "What would you like to do next?",
+                            "quickReplies": [
+                                "Get Started",
+                                "Search other employees"
                             ]
                         },
                         "platform": "FACEBOOK"
