@@ -99,21 +99,41 @@ def process_request(req):
             contact_info = employee_details.find_one(filtered_parameters)
 
             if contact_info:
-                message = "You can talk to {0} who is working as {1} in {2} department of this firm.\n" \
-                          "Contact: {3}".format(contact_info.get('name'),
-                                                contact_info.get('designation'),
-                                                contact_info.get('department'),
-                                                contact_info.get('contact_number'))
+                message = {
+                    "card": {
+                        "title": contact_info.get("name"),
+                        "subtitle": contact_info.get('designation') + " | " + contact_info.get('department') +
+                                    "\n" + "Phone: " + contact_info.get("contact_number"),
+                        "imageUri": "https://banner2.kisspng.com/20180403/tkw/kisspng-avatar-computer-icons-user"
+                                    "-profile-business-user-avatar-5ac3a1f7d96614.9721182215227704238905.jpg",
+                        "buttons": [
+                            {
+                                "text": "View Profile"
+                            }
+                        ]
+                    },
+                    "platform": "FACEBOOK"
+                },
             else:
-                message = "Sorry, I was not able to find the given person."
+                message = {
+                    "text": {
+                        "text": [
+                            "Sorry, I was not able to find the given person."
+                        ]
+                    },
+                    "platform": "FACEBOOK"
+                }
 
             return {
                 "source": "webhook",
                 "fulfillmentMessages": [
+                    message,
                     {
-                        "text": {
-                            "text": [
-                                message
+                        "quickReplies": {
+                            "title": "What would you like to do next?",
+                            "quickReplies": [
+                                "Get Started",
+                                "Search other employees"
                             ]
                         },
                         "platform": "FACEBOOK"
@@ -159,7 +179,8 @@ def process_request(req):
                     {
                         "card": {
                             "title": contact_info.get("name"),
-                            "subtitle": contact_info.get('designation') + " | " + contact_info.get('department'),
+                            "subtitle": contact_info.get('designation') + " | " + contact_info.get('department') +
+                                        "\n" + "Phone: " + contact_info.get("contact_number"),
                             "imageUri": "https://banner2.kisspng.com/20180403/tkw/kisspng-avatar-computer-icons-user"
                                         "-profile-business-user-avatar-5ac3a1f7d96614.9721182215227704238905.jpg",
                             "buttons": [
