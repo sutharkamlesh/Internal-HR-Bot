@@ -104,8 +104,7 @@ def process_request(req):
                         "title": contact_info.get("name"),
                         "subtitle": contact_info.get('designation') + " | " + contact_info.get('department') +
                                     "\n" + "Phone: " + contact_info.get("contact_number"),
-                        "imageUri": "https://banner2.kisspng.com/20180403/tkw/kisspng-avatar-computer-icons-user"
-                                    "-profile-business-user-avatar-5ac3a1f7d96614.9721182215227704238905.jpg",
+                        "imageUri": "https://www.cristianmonroy.com/wp-content/uploads/2017/11/avatars-avataaars.png",
                         "buttons": [
                             {
                                 "text": "View Profile"
@@ -181,8 +180,7 @@ def process_request(req):
                             "title": contact_info.get("name"),
                             "subtitle": contact_info.get('designation') + " | " + contact_info.get('department') +
                                         "\n" + "Phone: " + contact_info.get("contact_number"),
-                            "imageUri": "https://banner2.kisspng.com/20180403/tkw/kisspng-avatar-computer-icons-user"
-                                        "-profile-business-user-avatar-5ac3a1f7d96614.9721182215227704238905.jpg",
+                            "imageUri": "https://www.cristianmonroy.com/wp-content/uploads/2017/11/avatars-avataaars.png",
                             "buttons": [
                                 {
                                     "text": "View Profile"
