@@ -172,25 +172,35 @@ def process_request(req):
         elif action == "search_employee":
             parameters = req.get("queryResult").get("parameters")
             contact_info = employee_details.find_one(parameters)
-
+            if contact_info:
+                message = {
+                    "card": {
+                        "title": contact_info.get("name"),
+                        "subtitle": contact_info.get('designation') + " | " + contact_info.get('department') +
+                                    "\n" + "Phone: " + contact_info.get("contact_number"),
+                        "imageUri": "https://www.cristianmonroy.com/wp-content/uploads/2017/11/avatars-avataaars"
+                                    ".png",
+                        "buttons": [
+                            {
+                                "text": "View Profile"
+                            }
+                        ]
+                    },
+                    "platform": "FACEBOOK"
+                }
+            else:
+                message = {
+                    "text": {
+                        "text": [
+                            "Sorry, I didn't get employee you requested."
+                        ]
+                    },
+                    "platform": "FACEBOOK"
+                }
             return {
                 "source": "webhook",
                 "fulfillmentMessages": [
-                    {
-                        "card": {
-                            "title": contact_info.get("name"),
-                            "subtitle": contact_info.get('designation') + " | " + contact_info.get('department') +
-                                        "\n" + "Phone: " + contact_info.get("contact_number"),
-                            "imageUri": "https://www.cristianmonroy.com/wp-content/uploads/2017/11/avatars-avataaars"
-                                        ".png",
-                            "buttons": [
-                                {
-                                    "text": "View Profile"
-                                }
-                            ]
-                        },
-                        "platform": "FACEBOOK"
-                    },
+                    message,
                     {
                         "quickReplies": {
                             "title": "What would you like to do next?",
