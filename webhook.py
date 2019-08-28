@@ -147,11 +147,11 @@ def process_request(req):
             sentiment = text.sentiment.polarity
             subjective = text.sentiment.subjectivity
 
-            if sentiment >= 0.15:
-                message = u"\U0001F600 " + f"We are glad that you like our culture.\nSentiment Score: {sentiment}"
-            elif sentiment <= -0.15:
+            if sentiment >= 0.15 or feedback == "🙂":
+                message = u"\U0001F600 " + f"We are glad that you like our culture."
+            elif sentiment <= -0.15 or feedback == "☹️":
                 message = f"Sorry to hear that. We will make sure to improve our culture and make this " \
-                          f"a better place to work.\nSentiment Score: {sentiment}"
+                          f"a better place to work."
             else:
                 message = "Alright, I have noted the feedback."
 
