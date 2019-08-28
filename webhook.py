@@ -95,24 +95,25 @@ def process_request(req):
         elif action == "find.colleague":
             parameters = req.get("queryResult").get("parameters")
             filtered_parameters = {key: val for key, val in parameters.items()
-                                   if val != ''}    # Removing empty parameters
+                                   if val != ''}  # Removing empty parameters
             contact_info = employee_details.find_one(filtered_parameters)
 
             if contact_info:
                 message = {
-                    "card": {
-                        "title": contact_info.get("name"),
-                        "subtitle": contact_info.get('designation') + " | " + contact_info.get('department') +
-                                    "\n" + "Phone: " + contact_info.get("contact_number"),
-                        "imageUri": "https://www.cristianmonroy.com/wp-content/uploads/2017/11/avatars-avataaars.png",
-                        "buttons": [
-                            {
-                                "text": "View Profile"
-                            }
-                        ]
-                    },
-                    "platform": "FACEBOOK"
-                },
+                              "card": {
+                                  "title": contact_info.get("name"),
+                                  "subtitle": contact_info.get('designation') + " | " + contact_info.get('department') +
+                                              "\n" + "Phone: " + contact_info.get("contact_number"),
+                                  "imageUri": "https://www.cristianmonroy.com/wp-content/uploads/2017/11/avatars"
+                                              "-avataaars.png",
+                                  "buttons": [
+                                      {
+                                          "text": "View Profile"
+                                      }
+                                  ]
+                              },
+                              "platform": "FACEBOOK"
+                          },
             else:
                 message = {
                     "text": {
@@ -147,7 +148,7 @@ def process_request(req):
             subjective = text.sentiment.subjectivity
 
             if sentiment >= 0.15:
-                message = f"We are glad that you like our culture.\nSentiment Score: {sentiment}"
+                message = u"\U0001F4A9 " + f"We are glad that you like our culture.\nSentiment Score: {sentiment}"
             elif sentiment <= -0.15:
                 message = f"Sorry to hear that. We will make sure to improve our culture and make this " \
                           f"a better place to work.\nSentiment Score: {sentiment}"
@@ -180,7 +181,8 @@ def process_request(req):
                             "title": contact_info.get("name"),
                             "subtitle": contact_info.get('designation') + " | " + contact_info.get('department') +
                                         "\n" + "Phone: " + contact_info.get("contact_number"),
-                            "imageUri": "https://www.cristianmonroy.com/wp-content/uploads/2017/11/avatars-avataaars.png",
+                            "imageUri": "https://www.cristianmonroy.com/wp-content/uploads/2017/11/avatars-avataaars"
+                                        ".png",
                             "buttons": [
                                 {
                                     "text": "View Profile"
