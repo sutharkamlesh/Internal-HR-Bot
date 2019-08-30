@@ -113,7 +113,7 @@ def process_request(req):
                                   ]
                               },
                               "platform": "FACEBOOK"
-                          },
+                          }
             else:
                 message = {
                     "text": {
@@ -138,7 +138,7 @@ def process_request(req):
                         },
                         "platform": "FACEBOOK"
                     }
-                ],
+                ]
             }
 
         elif action == "Feedback.Feedback-custom":
