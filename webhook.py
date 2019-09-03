@@ -174,7 +174,7 @@ def process_request(req):
             filtered_parameters = {key: val for key, val in parameters.items()
                                    if val != ''}  # Removing empty parameters
             contact_info = employee_details.find_one(filtered_parameters)
-            if contact_info:
+            if contact_info and filtered_parameters:
                 message = {
                     "card": {
                         "title": contact_info.get("name"),
@@ -213,7 +213,7 @@ def process_request(req):
                         },
                         "platform": "FACEBOOK"
                     }
-                ],
+                ]
             }
 
     except Exception as e:
