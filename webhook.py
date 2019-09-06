@@ -47,8 +47,18 @@ def process_request(req):
                             ]
                         },
                         "platform": "FACEBOOK"
+                    },
+                    {
+                        "quickReplies": {
+                            "title": "What would you like to do next?",
+                            "quickReplies": [
+                                "Get Started",
+                                "Check Leave Balance"
+                            ]
+                        },
+                        "platform": "FACEBOOK"
                     }
-                ],
+                ]
             }
 
         elif action == "request.vacation":
