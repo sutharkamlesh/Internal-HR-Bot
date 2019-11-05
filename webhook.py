@@ -232,7 +232,7 @@ def process_request(req):
 
         elif action == "show.all.public.holidays":
             state = req.get("queryResult").get("parameters").get("geo-state")
-            public_holidays_string = public_holidays[public_holidays["State"] == state].to_string(columns=["Date", "Holiday"], index=False, justify="left")
+            public_holidays_string = public_holidays[public_holidays["State"] == state].to_string(columns=["Date", "Holiday"], index=False)
             return {
                 "source": "webhook",
                 "fulfillmentMessages": [
