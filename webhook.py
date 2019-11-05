@@ -232,14 +232,14 @@ def process_request(req):
 
         elif action == "show.all.public.holidays":
             state = req.get("queryResult").get("parameters").get("geo-state")
-            public_holidays_string = str(public_holidays[public_holidays["State"] == state].loc[:, ["Date", "Holidays"]])
+            public_holidays_string = str(public_holidays[public_holidays["State"] == state].loc[:, ["Date", "Holiday"]])
             return {
                 "source": "webhook",
                 "fulfillmentMessages": [
                     {
                         "text": {
                             "text": [
-                                "Here are the list of all holidays in " + state + "\n" + public_holidays_string
+                                "Here is the list of all public holidays in " + state + "\n" + public_holidays_string
                             ]
                         },
                         "platform": "FACEBOOK"
@@ -256,8 +256,6 @@ def process_request(req):
                     }
                 ]
             }
-
-
 
     except Exception as e:
         print("Error:", e)
