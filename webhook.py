@@ -4,6 +4,7 @@ import traceback
 import utils
 
 from flask import Flask
+import pandas as pd
 from flask import request, make_response
 from pymongo import MongoClient
 from textblob import TextBlob
@@ -12,6 +13,9 @@ MONGODB_URI = "mongodb+srv://kamlesh:techmatters123@aflatoun-quiz-pflgi.mongodb.
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
 db = client.hrchatbot
 employee_details = db.employee_details
+
+# Importing Holidays data sets
+public_holidays = pd.read_csv("data/public_holidays.csv")
 
 # Flask app should start in global layout
 app = Flask(__name__)
@@ -225,6 +229,35 @@ def process_request(req):
                     }
                 ]
             }
+
+        elif action == "show.all.public.holidays":
+            state = req.get("queryResult").get("parameters").get("geo-state")
+            public_holidays_string = str(public_holidays[public_holidays["State"] == state].loc[:, ["Date", "Holidays"]])
+            return {
+                "source": "webhook",
+                "fulfillmentMessages": [
+                    {
+                        "text": {
+                            "text": [
+                                "Here are the list of all holidays in " + state + "\n" + public_holidays_string
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    },
+                    {
+                        "quickReplies": {
+                            "title": "What would you like to do next?",
+                            "quickReplies": [
+                                "Get Started",
+                                "Search other employees"
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    }
+                ]
+            }
+
+
 
     except Exception as e:
         print("Error:", e)
