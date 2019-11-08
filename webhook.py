@@ -13,6 +13,8 @@ MONGODB_URI = "mongodb+srv://kamlesh:techmatters123@aflatoun-quiz-pflgi.mongodb.
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
 db = client.hrchatbot
 employee_details = db.employee_details
+jobs = db.Hiring_PublicJobPosition
+
 
 # Importing Holidays data sets
 public_holidays = pd.read_csv("data/public_holidays.csv")
@@ -232,14 +234,14 @@ def process_request(req):
 
         elif action == "show.all.public.holidays":
             state = req.get("queryResult").get("parameters").get("geo-state")
-            public_holidays_string = public_holidays[public_holidays["State"] == state].to_string(columns=["Date", "Holiday"], index=False)
+            public_holidays_string = public_holidays[public_holidays["State"] == state].to_string(columns=["Date", "Holiday"], header=False, index=False)
             return {
                 "source": "webhook",
                 "fulfillmentMessages": [
                     {
                         "text": {
                             "text": [
-                                "Here is the list of all public holidays in " + state + "\n" + public_holidays_string
+                                "Here is the list of all public holidays in " + state + "\n\n" + public_holidays_string
                             ]
                         },
                         "platform": "FACEBOOK"
@@ -256,6 +258,64 @@ def process_request(req):
                     }
                 ]
             }
+
+        elif action == "show.all.jobs":
+            jobs_search = jobs.find({"statusVisible": "enum.Hiring_JobPositionStatusVisible.Public"}).limit(3)
+
+            if jobs_search:
+                job_detail={}
+                return {
+                    "source": "webhook",
+                    "fulfillmentMessages":   [
+                        {
+                            "card": {
+                                "title": job["jobTitle"],
+                                "subtitle": job["companyName"] + " | " + job["locality"] + " | " + job["region"],
+                                "imageUri": "https://akm-img-a-in.tosshub.com/sites/btmt/images/stories/jobs660_090518050232_103118054303_022119084317.jpg",
+                                "buttons": [
+                                    {
+                                        "text": "View Job Detail",
+                                        "postback": job["jobDetailsUrl"]
+                                    }
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        } for job in jobs_search
+                    ] + [
+                        {
+                            "quickReplies": {
+                                "title": "What would you like to do next?",
+                                "quickReplies": [
+                                    "Get Started"
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        }
+                    ]
+                }
+            else:
+                return {
+                    "source": "webhook",
+                    "fulfillmentMessages":   [
+                        {
+                            "text": {
+                                "text": [
+                                    "Sorry to inform you that currently we don't have any job openings"
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        },
+                        {
+                            "quickReplies": {
+                                "title": "What would you like to do next?",
+                                "quickReplies": [
+                                    "Get Started"
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        }
+                    ]
+                }
 
     except Exception as e:
         print("Error:", e)
