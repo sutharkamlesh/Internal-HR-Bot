@@ -267,20 +267,27 @@ def process_request(req):
                     "source": "webhook",
                     "fulfillmentMessages":   [
                         {
+                            "text": {
+                                "text": [
+                                    "Here are some job openings available in our organisation."
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        }] + [
+                        {
                             "card": {
                                 "title": job["jobTitle"],
                                 "subtitle": job["companyName"] + " | " + job["locality"] + " | " + job["region"],
                                 "imageUri": "https://akm-img-a-in.tosshub.com/sites/btmt/images/stories/jobs660_090518050232_103118054303_022119084317.jpg",
                                 "buttons": [
                                     {
-                                        "text": "View Job Detail",
+                                        "text": "Refer this Job",
                                         "postback": job["jobDetailsUrl"]
                                     }
                                 ]
                             },
                             "platform": "FACEBOOK"
-                        } for job in jobs_search
-                    ] + [
+                        } for job in jobs_search] + [
                         {
                             "quickReplies": {
                                 "title": "What would you like to do next?",
