@@ -1,3 +1,4 @@
+# coding=utf-8
 import json
 import os
 import traceback
@@ -14,7 +15,6 @@ client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
 db = client.hrchatbot
 employee_details = db.employee_details
 jobs = db.Hiring_PublicJobPosition
-
 
 # Importing Holidays data sets
 public_holidays = pd.read_csv("data/public_holidays.csv")
@@ -166,8 +166,8 @@ def process_request(req):
             if sentiment >= 0.15 or feedback == "🙂":
                 message = u"\U0001F600 " + f"We are glad that you like our culture."
             elif sentiment <= -0.15 or feedback == "☹️":
-                message = f"Sorry to hear that. We will make sure to improve our culture and make this " \
-                          f"a better place to work."
+                message = "Sorry to hear that. We will make sure to improve our culture and make this " \
+                          "a better place to work."
             else:
                 message = "Alright, I have noted the feedback."
 
@@ -262,7 +262,7 @@ def process_request(req):
         elif action == "show.all.jobs":
             jobs_search = jobs.find({"statusVisible": "enum.Hiring_JobPositionStatusVisible.Public"}).limit(3)
 
-            if jobs_search:
+            if jobs_search.count() != 0:
                 return {
                     "source": "webhook",
                     "fulfillmentMessages":   [
