@@ -3,6 +3,8 @@ import json
 import os
 import traceback
 import utils
+import random
+import datetime
 
 from flask import Flask
 import pandas as pd
@@ -15,6 +17,7 @@ client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
 db = client.hrchatbot
 employee_details = db.employee_details
 jobs = db.Hiring_PublicJobPosition
+tickets = db.Tickets
 
 # Importing Holidays data sets
 public_holidays = pd.read_csv("data/public_holidays.csv")
@@ -327,13 +330,23 @@ def process_request(req):
                 }
 
         elif action == "raise.ticket":
-
+            query = req.get("queryResult").get("parameters").get("query")
+            tickets.insert_one({
+                "employee_id": "EMP"+ str(random.randint(1000, 9999)),
+                "description": query,
+                "priority": "high",
+                "status": "open",
+                "created_date": datetime.datetime.now().isoformat(),
+                "due_date": "",
+                "comment": "",
+            })
             return {
                 "source": "webhook",
                 "fulfillmentMessages":   [
                     {
                         "quickReplies": {
-                            "title": "Great. I will notify our HR about your query and they resolve it as soon as possible.",
+                            "title": "Great. I will notify our HR about your query, and they resolve it as soon as "
+                                     "possible.",
                             "quickReplies": [
                                 "Get Started"
                             ]
