@@ -22,6 +22,8 @@ public_holidays = pd.read_csv("data/public_holidays.csv")
 # Flask app should start in global layout
 app = Flask(__name__)
 
+# Adding a counter variable
+unknown_flag = 0
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -34,6 +36,7 @@ def webhook():
 
 
 def process_request(req):
+    global unknown_flag
     try:
         action = req.get("queryResult").get("action")
 
@@ -319,6 +322,55 @@ def process_request(req):
                                 ]
                             },
                             "platform": "FACEBOOK"
+                        }
+                    ]
+                }
+
+        elif action == "raise.ticket":
+
+            return {
+                "source": "webhook",
+                "fulfillmentMessages":   [
+                    {
+                        "quickReplies": {
+                            "title": "Great. I will notify our HR about your query and they resolve it as soon as possible.",
+                            "quickReplies": [
+                                "Get Started"
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    }
+                ]
+            }
+
+        elif action == "input.unknown":
+            unknown_flag += 1
+
+            if unknown_flag > 2:
+                unknown_flag = 0
+                query = req.get("queryResult").get("queryText")
+                return {
+                    "source": "webhook",
+                    "fulfillmentMessages":   [
+                        {
+                            "quickReplies": {
+                                "title": "If I am not able to fulfill your request, you can raise the ticket so that "
+                                         "our HR team can respond you directly.",
+                                "quickReplies": [
+                                    "Raise the Ticket",
+                                    "Get Started"
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        }
+                    ],
+                    "outputContexts": [
+                        {
+                            "name": "projects/internal-hr-bot-womtev/agent/sessions/f6ec5940-9c6d-d669-af33-45426780ba5d/contexts/raise_ticket",
+                            "lifespanCount": 1,
+                            "parameters": {
+                                "query": query,
+                            }
                         }
                     ]
                 }
