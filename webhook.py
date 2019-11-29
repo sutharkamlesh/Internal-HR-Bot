@@ -332,6 +332,7 @@ def process_request(req):
         elif action == "raise.ticket":
             query = req.get("queryResult").get("parameters").get("query")
             tickets.insert_one({
+                "token_id": tickets.count() + 1,
                 "employee_id": "EMP"+ str(random.randint(1000, 9999)),
                 "description": query,
                 "priority": "high",
@@ -359,7 +360,7 @@ def process_request(req):
         elif action == "input.unknown":
             unknown_flag += 1
 
-            if unknown_flag > 2:
+            if unknown_flag >= 2:
                 unknown_flag = 0
                 query = req.get("queryResult").get("queryText")
                 return {
