@@ -31,7 +31,11 @@ unknown_flag = 0
 @app.route('/webhook', methods=['POST'])
 def webhook():
     req = request.get_json(silent=True, force=True)
-    print(request.headers)
+    print("Request Header: ", request.headers)
+    if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
+        print("Request IP : ", request.environ['REMOTE_ADDR'])
+    else:
+        print("Request IP: ", request.environ['HTTP_X_FORWARDED_FOR'])
     res = process_request(req)
     res = json.dumps(res, indent=4)
     r = make_response(res)
