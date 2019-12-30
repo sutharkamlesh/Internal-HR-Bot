@@ -4,7 +4,8 @@ import os
 import traceback
 import utils
 import random
-import datetime
+#import datetime
+from datetime import datetime
 
 from flask import Flask
 import pandas as pd
@@ -18,6 +19,7 @@ db = client.hrchatbot
 employee_details = db.employee_details
 jobs = db.Hiring_PublicJobPosition
 tickets = db.Tickets
+history=db.hrbot_history
 
 # Importing Holidays data sets
 public_holidays = pd.read_csv("data/public_holidays.csv")
@@ -45,6 +47,12 @@ def webhook():
 
 def process_request(req):
     global unknown_flag
+    req.update({"date": datetime.date(datetime.now()).isoformat()})
+    req.update({"time": datetime.time(datetime.now()).isoformat()})
+    try:
+        history.insert(req, check_keys=False)
+    except:
+        pass
     try:
         action = req.get("queryResult").get("action")
 
