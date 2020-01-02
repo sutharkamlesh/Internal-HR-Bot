@@ -48,7 +48,7 @@ def webhook():
 def process_request(req):
     global unknown_flag
     req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
-
+    print("Hello world")
     try:
         history.insert(req, check_keys=False)
     except:
