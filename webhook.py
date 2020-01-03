@@ -51,8 +51,9 @@ def process_request(req):
     #req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
     #today = date.today()
     #req.update({"today date":today.strftime("%B %d, %Y")})
-    x={'DateTime':datetime.now().isoformat()}
+    x=datetime.now().isoformat()
     y='ISODate("'+ str(x) + '")'
+    req.update({'DateTime':y})
 
     try:
         history.insert(req, check_keys=False)
