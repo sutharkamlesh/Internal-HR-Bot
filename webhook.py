@@ -6,6 +6,7 @@ import utils
 import random
 #import datetime
 from datetime import datetime
+from datetime import date
 
 from flask import Flask
 import pandas as pd
@@ -47,8 +48,12 @@ def webhook():
 
 def process_request(req):
     global unknown_flag
-    req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
-    print("Hello world")
+    #req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
+    #today = date.today()
+    #req.update({"today date":today.strftime("%B %d, %Y")})
+    x={'DateTime':datetime.now().isoformat()}
+    y='ISODate("'+ str(x) + '")'
+
     try:
         history.insert(req, check_keys=False)
     except:
