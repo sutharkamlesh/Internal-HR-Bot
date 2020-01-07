@@ -48,12 +48,13 @@ def webhook():
 
 def process_request(req):
     global unknown_flag
-    #req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
+    req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
     #today = date.today()
     #req.update({"today date":today.strftime("%B %d, %Y")})
-    x=datetime.now().isoformat()
-    y='ISODate("'+ str(x) + '")'
-    req.update({'DateTime':y})
+    now = datetime.now()
+    timestamp = int(datetime.timestamp(now))
+    req.update({"timestamp": timestamp})
+
 
     try:
         history.insert(req, check_keys=False)
