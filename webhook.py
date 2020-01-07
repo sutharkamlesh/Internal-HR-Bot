@@ -4,7 +4,7 @@ import os
 import traceback
 import utils
 import random
-#import datetime
+import datetime
 from datetime import datetime
 from datetime import date
 
@@ -48,12 +48,12 @@ def webhook():
 
 def process_request(req):
     global unknown_flag
-    req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
+    #req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
     #today = date.today()
     #req.update({"today date":today.strftime("%B %d, %Y")})
-    now = datetime.now()
-    timestamp = int(datetime.timestamp(now))
-    req.update({"timestamp":timestamp})
+    x=datetime.now().isoformat()
+    y='ISODate("'+ str(x) + '")'
+    req.update({'DateTime':y})
 
     try:
         history.insert(req, check_keys=False)
@@ -106,6 +106,17 @@ def process_request(req):
                             ]
                         },
                         "platform": "FACEBOOK"
+                    },
+                    {
+                        "quickReplies": {
+                            "title": "What would you like to do next?",
+                            "quickReplies": [
+                                "Get Started",
+                                "Check Leave Balance",
+
+                            ]
+                        },
+                        "platform": "FACEBOOK"
                     }
                 ],
             }
@@ -126,6 +137,17 @@ def process_request(req):
                         "text": {
                             "text": [
                                 "Your Salary Slips are on your way. Please check your mail."
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    },
+                    {
+                        "quickReplies": {
+                            "title": "What would you like to do next?",
+                            "quickReplies": [
+                                "Get Started",
+                                "Reimbursement",
+                                "My Health Insurance"
                             ]
                         },
                         "platform": "FACEBOOK"
@@ -206,6 +228,16 @@ def process_request(req):
                             ]
                         },
                         "platform": "FACEBOOK"
+                    },
+                    {
+                        "quickReplies": {
+                            "title": "What would you like to do next?",
+                            "quickReplies": [
+                                "Get Started",
+                                "Submit An idea"
+                            ]
+                        },
+                        "platform": "FACEBOOK"
                     }
                 ],
             }
@@ -276,7 +308,8 @@ def process_request(req):
                             "title": "What would you like to do next?",
                             "quickReplies": [
                                 "Get Started",
-                                "Search other employees"
+                                "Check Leave Balance",
+                                "Apply for leave"
                             ]
                         },
                         "platform": "FACEBOOK"
@@ -356,7 +389,8 @@ def process_request(req):
                 "description": query,
                 "priority": "high",
                 "status": "open",
-                "created_date": datetime.datetime.now().isoformat(),
+                "created_date": "date",
+                # "created_date": datetime.datetime.now().isoformat(),
                 "due_date": "",
                 "comment": "",
             })
