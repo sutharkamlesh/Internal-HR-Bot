@@ -53,7 +53,7 @@ def process_request(req):
     #req.update({"today date":today.strftime("%B %d, %Y")})
     now = datetime.now()
     timestamp =datetime.timestamp(now)
-    timestamp1=int(timestamp*(10**4))
+    timestamp1=int(timestamp*(10**3))
     req.update({"timestamp": timestamp1})
 
 
