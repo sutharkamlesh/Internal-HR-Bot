@@ -245,7 +245,7 @@ def process_request(req):
             }
 
         elif action == "search_employee":
-            parameters = req.get("queryResult").get("parameters")
+            parameters = req.get("queryResult").get("parameters").get("name")
             filtered_parameters = {key: val for key, val in parameters.items()
                                    if val != ''}  # Removing empty parameters
             contact_info = employee_details.find_one(filtered_parameters)
