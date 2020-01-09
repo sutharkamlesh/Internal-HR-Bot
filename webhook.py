@@ -457,3 +457,11 @@ if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     print("Starting app on port {}".format(port))
     app.run(debug=False, port=port, host='0.0.0.0')
+
+
+
+from googletrans import Translator
+translator = Translator(service_urls=['translate.google.com', 'translate.google.co.kr'])
+translations = translator.translate(['The quick brown fox jumps over the lazy dog'], dest='es')
+for translation in translations:
+    print(translation.origin, ' -> ', translation.text)
