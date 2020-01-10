@@ -13,6 +13,7 @@ import pandas as pd
 from flask import request, make_response
 from pymongo import MongoClient
 from textblob import TextBlob
+import math, random
 
 MONGODB_URI = "mongodb+srv://kamlesh:techmatters123@aflatoun-quiz-pflgi.mongodb.net/test?retryWrites=true&w=majority"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
@@ -48,6 +49,7 @@ def webhook():
 
 def process_request(req):
     global unknown_flag
+    global original_otp
     req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
     #today = date.today()
     #req.update({"today date":today.strftime("%B %d, %Y")})
@@ -66,6 +68,47 @@ def process_request(req):
 
         if action == "input.welcome":
             print("Webhook Successfully connected.")
+
+        elif action == "verify":
+            employ_id = req.get("queryResult").get("queryText")
+            id={"employ_id":employ_id}
+            if id in employee_details:
+                contact_info=employee_details.find_one(id)
+                to_email=contact_info['email_ID']
+                subject = "ONE TIME PASSWORD"
+                body = "This is your one time password- " + original_otp
+                utils.send_mail(to_email, subject, body)
+        elif action == "otp":
+            otp=req.get("queryResult").get("queryText")
+            if otp==original_otp:
+                return {
+                    "source": "webhook",
+                    "fulfillmentMessages": [
+                        {
+                            "text": {
+                                "text": [
+                                     "You have successfully verified as existing employee"
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        }
+                ]
+                }
+            else:
+                return {
+                    "source": "webhook",
+                    "fulfillmentMessages": [
+                        {
+                            "text": {
+                                "text": [
+                                    "You employee id or otp is incorrect"
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        }
+                ]
+                }
+
 
         elif action == "request.leave":
             date_string = req.get("queryResult").get("parameters").get("date")
@@ -93,7 +136,6 @@ def process_request(req):
                     }
                 ]
             }
-
         elif action == "request.vacation":
             start_date = req.get("queryResult").get("parameters").get("date-period").get("startDate")
             end_date = req.get("queryResult").get("parameters").get("date-period").get("endDate")

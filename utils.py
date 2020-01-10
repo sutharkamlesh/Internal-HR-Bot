@@ -1,4 +1,5 @@
 import smtplib
+import math, random
 
 months = "January,February,March,April,May,June,July,August,September,October,November,December".split(",")
 
@@ -33,3 +34,14 @@ def batch_update_entities(project_id, entity_type, entities):
     parent = client.entity_type_path(project_id, entity_type)
     response = client.batch_create_entities(parent, entities)
     print("Entities Updated: \n{}".format(response))
+
+
+def generateOTP():
+    # Declare a string variable
+    # which stores all string
+    string = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    OTP = ""
+    length = len(string)
+    for i in range(6):
+        OTP += string[math.floor(random.random() * length)]
+    return OTP
