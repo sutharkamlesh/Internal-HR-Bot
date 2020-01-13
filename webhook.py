@@ -76,6 +76,7 @@ def process_request(req):
                 contact_info=employee_details.find_one(id)
                 to_email=contact_info['email_ID']
                 subject = "ONE TIME PASSWORD"
+                original_otp=generateOTP()
                 body = "This is your one time password- " + original_otp
                 utils.send_mail(to_email, subject, body)
         elif action == "otp":
