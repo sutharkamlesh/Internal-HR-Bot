@@ -4,7 +4,6 @@ import os
 import traceback
 import random
 import utils
-import ran
 import datetime
 from datetime import datetime
 from datetime import date
@@ -14,7 +13,7 @@ import pandas as pd
 from flask import request, make_response
 from pymongo import MongoClient
 from textblob import TextBlob
-import math, ran
+import math
 
 MONGODB_URI = "mongodb+srv://kamlesh:techmatters123@aflatoun-quiz-pflgi.mongodb.net/test?retryWrites=true&w=majority"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
@@ -498,7 +497,7 @@ def process_request(req):
             query = req.get("queryResult").get("parameters").get("query")
             tickets.insert_one({
                 "token_id": tickets.count() + 1,
-                "employee_id": "EMP"+ str(ran.randint(1000, 9999)),
+                "employee_id": "EMP"+ str(random.randint(1000, 9999)),
                 "description": query,
                 "priority": "high",
                 "status": "open",
