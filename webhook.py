@@ -79,36 +79,36 @@ def process_request(req):
                 original_otp=generateOTP()
                 body = "This is your one time password- " + original_otp
                 utils.send_mail(to_email, subject, body)
-        elif action == "otp":
-            otp=req.get("queryResult").get("queryText")
-            if otp==original_otp:
-                return {
-                    "source": "webhook",
-                    "fulfillmentMessages": [
-                        {
-                            "text": {
-                                "text": [
-                                     "You have successfully verified as existing employee"
-                                ]
-                            },
-                            "platform": "FACEBOOK"
-                        }
-                ]
-                }
-            else:
-                return {
-                    "source": "webhook",
-                    "fulfillmentMessages": [
-                        {
-                            "text": {
-                                "text": [
-                                    "You employee id or otp is incorrect"
-                                ]
-                            },
-                            "platform": "FACEBOOK"
-                        }
-                ]
-                }
+
+                otp=req.get("queryResult").get("queryText")
+                if otp==original_otp:
+                    return {
+                        "source": "webhook",
+                        "fulfillmentMessages": [
+                            {
+                                "text": {
+                                    "text": [
+                                         "You have successfully verified as existing employee"
+                                    ]
+                                },
+                                "platform": "FACEBOOK"
+                            }
+                    ]
+                    }
+                else:
+                    return {
+                        "source": "webhook",
+                        "fulfillmentMessages": [
+                            {
+                                "text": {
+                                    "text": [
+                                        "You employee id or otp is incorrect"
+                                    ]
+                                },
+                                "platform": "FACEBOOK"
+                            }
+                    ]
+                    }
 
 
         elif action == "request.leave":
