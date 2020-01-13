@@ -50,7 +50,9 @@ def webhook():
 def process_request(req):
     global unknown_flag
     global original_otp
+    global id
     req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
+    req.update(id)
     #today = date.today()
     #req.update({"today date":today.strftime("%B %d, %Y")})
     now = datetime.now()
@@ -76,39 +78,43 @@ def process_request(req):
                 contact_info=employee_details.find_one(id)
                 to_email=contact_info['email_ID']
                 subject = "ONE TIME PASSWORD"
-                original_otp=generateOTP()
+                original_otp = generateOTP()
+                employee_details.find_one_and_update({"employ_id":employ_id},
+                    {"$set":{"temp_otp": original_otp}}, upsert=True)
                 body = "This is your one time password- " + original_otp
                 utils.send_mail(to_email, subject, body)
-
-                otp=req.get("queryResult").get("queryText")
-                if otp==original_otp:
-                    return {
-                        "source": "webhook",
-                        "fulfillmentMessages": [
-                            {
-                                "text": {
-                                    "text": [
-                                         "You have successfully verified as existing employee"
-                                    ]
-                                },
-                                "platform": "FACEBOOK"
-                            }
-                    ]
-                    }
-                else:
-                    return {
-                        "source": "webhook",
-                        "fulfillmentMessages": [
-                            {
-                                "text": {
-                                    "text": [
-                                        "You employee id or otp is incorrect"
-                                    ]
-                                },
-                                "platform": "FACEBOOK"
-                            }
-                    ]
-                    }
+        elif action == "otp":
+            otp = req.get("queryResult").get("queryText")
+            otp_temp={"temp":otp}
+            prev_id=employee_details.find_one(id)
+            if otp_temp == prev_id['temp_otp'] :
+                return {
+                    "source": "webhook",
+                    "fulfillmentMessages": [
+                        {
+                            "text": {
+                                "text": [
+                                     "You have successfully verified as existing employee"
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        }
+                ]
+                }
+            else:
+                return {
+                    "source": "webhook",
+                    "fulfillmentMessages": [
+                        {
+                            "text": {
+                                "text": [
+                                    "You employee id or otp is incorrect"
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        }
+                ]
+                }
 
 
         elif action == "request.leave":
