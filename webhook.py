@@ -50,9 +50,8 @@ def webhook():
 def process_request(req):
     global unknown_flag
     global original_otp
-    global id
-    req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
-    req.update(id)
+    global id1
+    req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat(),"employee_id":id1})
     #today = date.today()
     #req.update({"today date":today.strftime("%B %d, %Y")})
     now = datetime.now()
@@ -73,6 +72,7 @@ def process_request(req):
 
         elif action == "verify":
             employ_id = req.get("queryResult").get("queryText")
+            id1=employ_id
             id={"employ_id":employ_id}
             if id in employee_details:
                 contact_info=employee_details.find_one(id)
