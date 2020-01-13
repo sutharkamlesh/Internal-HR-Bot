@@ -563,7 +563,7 @@ def process_request(req):
         }
 
 
-if _name_ == '__main__':
+if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     print("Starting app on port {}".format(port))
     app.run(debug=False, port=port, host='0.0.0.0')
