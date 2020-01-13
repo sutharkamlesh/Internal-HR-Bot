@@ -2,8 +2,9 @@
 import json
 import os
 import traceback
-import utils
 import random
+import utils
+import ran
 import datetime
 from datetime import datetime
 from datetime import date
@@ -13,7 +14,7 @@ import pandas as pd
 from flask import request, make_response
 from pymongo import MongoClient
 from textblob import TextBlob
-import math, random
+import math, ran
 
 MONGODB_URI = "mongodb+srv://kamlesh:techmatters123@aflatoun-quiz-pflgi.mongodb.net/test?retryWrites=true&w=majority"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
@@ -31,6 +32,7 @@ app = Flask(__name__)
 
 # Adding a counter variable
 unknown_flag = 0
+employ_id = ()
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -49,9 +51,8 @@ def webhook():
 
 def process_request(req):
     global unknown_flag
-    global original_otp
-    global id1
-    req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat(),"employee_id":id1})
+    global employ_id
+    req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
     #today = date.today()
     #req.update({"today date":today.strftime("%B %d, %Y")})
     now = datetime.now()
@@ -70,24 +71,79 @@ def process_request(req):
         if action == "input.welcome":
             print("Webhook Successfully connected.")
 
-        elif action == "verify":
-            employ_id = req.get("queryResult").get("queryText")
-            id1=employ_id
-            id={"employ_id":employ_id}
-            if id in employee_details:
-                contact_info=employee_details.find_one(id)
-                to_email=contact_info['email_ID']
-                subject = "ONE TIME PASSWORD"
-                original_otp = generateOTP()
-                employee_details.find_one_and_update({"employ_id":employ_id},
-                    {"$set":{"temp_otp": original_otp}}, upsert=True)
-                body = "This is your one time password- " + original_otp
+        elif action == "emp_id":
+            parameters = req.get("queryResult").get("parameters")
+            print(parameters)
+            filtered_parameters = {key: val for key, val in parameters.items()
+                                   if val != ''}  # Removing empty parameters
+            print(filtered_parameters)
+            contact_info = employee_details.find_one(filtered_parameters)
+            if parameters and contact_info:
+                employ_id = filtered_parameters
+                print("employ id " + str(employ_id))
+                email = contact_info.get("email_ID")
+                print(email)
+                to_email = email
+                otp = random.randrange(1000, 9999)
+                employee_details.find_one_and_update(filtered_parameters,{"$set": {"temp_otp": otp}}, upsert=True)
+                print(otp)
+                subject = "verification OTP"
+                body = "OTP :- " + str(otp)
                 utils.send_mail(to_email, subject, body)
+                message = {
+                "source": "webhook",
+                "fulfillmentMessages": [
+                    {
+                        "text": {
+                            "text": [
+                                "Enter the OTP send to your registered Email-ID"
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    },
+                ],
+            }
+
+            else:
+                message = {
+                "source": "webhook",
+                "fulfillmentMessages": [
+                    {
+                        "text": {
+                            "text": [
+                                "Employee ID not valid"
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    },
+                    {
+                        "quickReplies": {
+                            "title": "Try again",
+                            "quickReplies": [
+                                "Get Started",
+                                "Existing Employee",
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    }
+                ],
+            }
+
+            return message
+
+
         elif action == "otp":
-            otp = req.get("queryResult").get("queryText")
-            otp_temp={"temp":otp}
-            prev_id=employee_details.find_one(id)
-            if otp_temp == prev_id['temp_otp'] :
+            otp=req.get("queryResult").get("queryText")
+            print(otp)
+            print(type(otp))
+            contact_info = employee_details.find_one(employ_id)
+            orginal_otp = contact_info.get("temp_otp")
+
+            print(employ_id)
+            print(orginal_otp)
+            print(type(orginal_otp))
+            if int(otp) == orginal_otp:
+
                 return {
                     "source": "webhook",
                     "fulfillmentMessages": [
@@ -255,6 +311,11 @@ def process_request(req):
                 ]
             }
 
+
+
+        # elif action == "remaining_leaves":
+
+
         elif action == "Feedback.Feedback-custom":
             feedback = req.get("queryResult").get("parameters").get('feedback')
             text = TextBlob(feedback)
@@ -297,13 +358,14 @@ def process_request(req):
             parameters = req.get("queryResult").get("parameters").get("name")
             filtered_parameters = {key: val for key, val in parameters.items()
                                    if val != ''}  # Removing empty parameters
+            print(filtered_parameters)
             contact_info = employee_details.find_one(filtered_parameters)
+            print(contact_info)
             if contact_info and filtered_parameters:
                 message = {
                     "card": {
                         "title": contact_info.get("name"),
-                        "subtitle": contact_info.get('designation') + " | " + contact_info.get('department') +
-                                    "\n" + "Phone: " + contact_info.get("contact_number"),
+                        "subtitle": contact_info.get('designation') + " | " + "Phone: " + str(contact_info.get("contact_number")),
                         "imageUri": "https://www.cristianmonroy.com/wp-content/uploads/2017/11/avatars-avataaars"
                                     ".png",
                         "buttons": [
@@ -436,7 +498,7 @@ def process_request(req):
             query = req.get("queryResult").get("parameters").get("query")
             tickets.insert_one({
                 "token_id": tickets.count() + 1,
-                "employee_id": "EMP"+ str(random.randint(1000, 9999)),
+                "employee_id": "EMP"+ str(ran.randint(1000, 9999)),
                 "description": query,
                 "priority": "high",
                 "status": "open",
@@ -502,15 +564,7 @@ def process_request(req):
         }
 
 
-if __name__ == '__main__':
+if _name_ == '__main__':
     port = int(os.getenv('PORT', 5000))
     print("Starting app on port {}".format(port))
-    app.run(debug=False, port=port, host='0.0.0.0')
-
-
-
-from googletrans import Translator
-translator = Translator(service_urls=['translate.google.com', 'translate.google.co.kr'])
-translations = translator.translate(['The quick brown fox jumps over the lazy dog'], dest='es')
-for translation in translations:
-    print(translation.origin, ' -> ', translation.text)
+    app.run(debug=True, port=port, host='0.0.0.0')
