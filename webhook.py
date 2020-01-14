@@ -31,7 +31,7 @@ app = Flask(__name__)
 
 # Adding a counter variable
 unknown_flag = 0
-employ_id = ()
+employ_id = {}
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -51,7 +51,9 @@ def webhook():
 def process_request(req):
     global unknown_flag
     global employ_id
+
     req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
+    req.update({"employee_id":employ_id["employ_id"]})
     #today = date.today()
     #req.update({"today date":today.strftime("%B %d, %Y")})
     now = datetime.now()
@@ -79,7 +81,7 @@ def process_request(req):
             contact_info = employee_details.find_one(filtered_parameters)
             if parameters and contact_info:
                 employ_id = filtered_parameters
-                print("employ id " + str(employ_id))
+                print("employ id " + employ_id)
                 email = contact_info.get("email_ID")
                 print(email)
                 to_email = email
