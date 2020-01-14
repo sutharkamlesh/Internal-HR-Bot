@@ -4,6 +4,7 @@ import os
 import traceback
 import random
 import utils
+
 import datetime
 from datetime import datetime
 from datetime import date
@@ -51,7 +52,6 @@ def webhook():
 def process_request(req):
     global unknown_flag
     global employ_id
-
     req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
     req.update({"employee_id":employ_id["employ_id"]})
     #today = date.today()
@@ -81,7 +81,8 @@ def process_request(req):
             contact_info = employee_details.find_one(filtered_parameters)
             if parameters and contact_info:
                 employ_id = filtered_parameters
-                print("employ id " + employ_id)
+                print("employ id " + str(employ_id))
+                print(type(employ_id))
                 email = contact_info.get("email_ID")
                 print(email)
                 to_email = email
@@ -148,15 +149,27 @@ def process_request(req):
                 return {
                     "source": "webhook",
                     "fulfillmentMessages": [
-                        {
-                            "text": {
-                                "text": [
-                                     "You have successfully verified as existing employee"
-                                ]
-                            },
-                            "platform": "FACEBOOK"
+                      {
+                        "quickReplies": {
+                          "title": "Thank you for verification. I am Qi, your virtual HR assistant and I can help you in these following things.",
+                          "quickReplies": [
+                            "My Leave & Absence",
+                            "My General Support",
+                            "My Pay & Benefits",
+                            "Happify Me",
+                            "My Learning"
+                          ]
+                        },
+                        "platform": "FACEBOOK"
+                      },
+                      {
+                        "text": {
+                          "text": [
+                            ""
+                          ]
                         }
-                ]
+                      }
+                    ]
                 }
             else:
                 return {
@@ -568,4 +581,5 @@ def process_request(req):
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     print("Starting app on port {}".format(port))
-    app.run(debug=False, port=port, host='0.0.0.0')
+    app.run(debug=True, port=port, host='0.0.0.0')
+
