@@ -53,7 +53,7 @@ def process_request(req):
     global unknown_flag
     global employ_id
     req.update({"date": datetime.date(datetime.now()).isoformat(),"time": datetime.time(datetime.now()).isoformat()})
-    req.update({"employee_id":employ_id["employ_id"]})
+    req.update({"employ_id":employ_id["employ_id"]})
     #today = date.today()
     #req.update({"today date":today.strftime("%B %d, %Y")})
     now = datetime.now()
@@ -74,6 +74,7 @@ def process_request(req):
 
         elif action == "emp_id":
             parameters = req.get("queryResult").get("parameters")
+            parameters["employ_id"]=parameters["employ_id"].upper()
             print(parameters)
             filtered_parameters = {key: val for key, val in parameters.items()
                                    if val != ''}  # Removing empty parameters
@@ -187,6 +188,63 @@ def process_request(req):
                 }
 
 
+
+
+        elif action == "remaining_leaves":
+            if employ_id:
+                contact_info = employee_details.find_one(employ_id)
+                remaining_leave = contact_info.get("leaves")
+                print(employ_id)
+                print(remaining_leave)
+                return{
+                    "source": "webhook",
+                    "fulfillmentMessages": [
+                      {
+                        "text": {
+                          "text": [
+                            "You have " +str(remaining_leave)+ " leaves out of 18 and these are going to expire by 31 December, 2019."
+                          ]
+                        },
+                        "platform": "FACEBOOK"
+                      },
+                      {
+                        "quickReplies": {
+                          "title": "What would you like to do next?",
+                          "quickReplies": [
+                            "Apply for Leave",
+                            "Cancel a Leave",
+                            "Get Started"
+                          ]
+                        },
+                        "platform": "FACEBOOK"
+                      }
+                    ]
+                }
+            else:
+                return {
+                    "source": "webhook",
+                    "fulfillmentMessages": [
+                        {
+                            "text": {
+                                "text": [
+                                    "please validate yourself as a existing employee"
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        },
+                        {
+                            "quickReplies": {
+                                "title": "What would you like to do next?",
+                                "quickReplies": [
+                                    "existing employee"
+                                ]
+                            },
+                            "platform": "FACEBOOK"
+                        }
+                    ]
+                }
+
+
         elif action == "request.leave":
             date_string = req.get("queryResult").get("parameters").get("date")
             return {
@@ -195,8 +253,7 @@ def process_request(req):
                     {
                         "text": {
                             "text": [
-                                "Okay, I will inform your manager that you are not going to come on " +
-                                utils.date2text(date_string)
+                                "Okay,you applied a leave for " + utils.date2text(date_string) +",  a mail has been send to your manager for approval "
                             ]
                         },
                         "platform": "FACEBOOK"
@@ -370,6 +427,7 @@ def process_request(req):
 
         elif action == "search_employee":
             parameters = req.get("queryResult").get("parameters").get("name")
+            parameters=parameters.lower()
             filtered_parameters = {key: val for key, val in parameters.items()
                                    if val != ''}  # Removing empty parameters
             print(filtered_parameters)
@@ -582,4 +640,6 @@ if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     print("Starting app on port {}".format(port))
     app.run(debug=True, port=port, host='0.0.0.0')
+
+
 
