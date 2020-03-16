@@ -1,23 +1,18 @@
 # coding=utf-8
+import datetime
 import json
 import os
-import traceback
 import random
-import utils
-
-import datetime
+import traceback
 from datetime import datetime
-from datetime import date
 
-from flask import Flask
 import pandas as pd
+from flask import Flask
 from flask import request, make_response
 from pymongo import MongoClient
 from textblob import TextBlob
 
-import math
-
-
+import utils
 
 MONGODB_URI = "mongodb://hrbot:hrbot#$123@198.199.77.69/HRBOT_DATABASE"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
@@ -63,8 +58,8 @@ def process_request(req):
     global employ_id
     global email
 
-    req.update({"date": datetime.date(datetime.now()).isoformat(), "time": datetime.time(datetime.now()).isoformat()})
-
+    req.update({"date": datetime.date(datetime.now()).isoformat()})
+    req.update({"time": datetime.time(datetime.now()).isoformat()})
     # req.update({"employ_id":employ_id["employ_id"]})
     # today = date.today()
     # req.update({"today date":today.strftime("%B %d, %Y")})
