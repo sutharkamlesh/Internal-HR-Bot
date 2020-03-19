@@ -14,7 +14,7 @@ from textblob import TextBlob
 
 import utils
 
-MONGODB_URI = "mongodb://hrbot:hrbot#$123@198.199.77.69/HRBOT_DATABASE"
+MONGODB_URI = "mongodb://uptime:Basketball10@134.122.18.134:27017/admin"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
 db = client.HRBOT_DATABASE
 # MONGODB_URI = "mongodb+srv://kamlesh:techmatters123@aflatoun-quiz-pflgi.mongodb.net/test?retryWrites=true&w=majority"
