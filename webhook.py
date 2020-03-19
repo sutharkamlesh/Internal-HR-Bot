@@ -16,7 +16,7 @@ import utils
 
 MONGODB_URI = "mongodb://uptime:Basketball10@134.122.18.134:27017/admin"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
-db = client.HRBOT_DATABASE
+db = client.hrbot_database
 # MONGODB_URI = "mongodb+srv://kamlesh:techmatters123@aflatoun-quiz-pflgi.mongodb.net/test?retryWrites=true&w=majority"
 # client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
 # db = client.hrchatbot
