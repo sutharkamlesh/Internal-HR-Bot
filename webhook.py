@@ -12,6 +12,8 @@ from flask import request, make_response
 from pymongo import MongoClient
 from textblob import TextBlob
 
+from pyresparser import ResumeParser
+
 import utils
 
 MONGODB_URI = "mongodb://uptime:Basketball10@134.122.18.134:27017/admin"
@@ -143,7 +145,6 @@ def process_request(req):
 
             return message
 
-
         elif action == "otp":
             otp = req.get("queryResult").get("queryText")
             print(otp)
@@ -204,7 +205,6 @@ def process_request(req):
                     ]
                 }
 
-
         elif action == "askhr":
             query = req.get("queryResult").get("parameters").get("query")
             print(query)
@@ -250,8 +250,6 @@ def process_request(req):
                     }
                 ]
             }
-
-
 
         elif action == "new_joinee":
             parameters = req.get("queryResult").get("parameters")
@@ -314,7 +312,6 @@ def process_request(req):
                 }
 
             return message
-
 
         elif action == "newjoinee.otp":
             otp = req.get("queryResult").get("queryText")
@@ -401,11 +398,6 @@ def process_request(req):
                     ]
                 }
 
-
-
-
-
-
         elif action == "remaining_leaves":
             if employ_id:
                 contact_info = employee_details.find_one(employ_id)
@@ -461,7 +453,6 @@ def process_request(req):
                     ]
                 }
 
-
         elif action == "request.leave":
             date_string = req.get("queryResult").get("parameters").get("date")
             return {
@@ -488,6 +479,7 @@ def process_request(req):
                     }
                 ]
             }
+
         elif action == "request.vacation":
             start_date = req.get("queryResult").get("parameters").get("date-period").get("startDate")
             end_date = req.get("queryResult").get("parameters").get("date-period").get("endDate")
@@ -600,8 +592,6 @@ def process_request(req):
                 ]
             }
 
-
-
         # elif action == "remaining_leaves":
 
         elif action == "Feedback.Feedback-custom":
@@ -705,8 +695,6 @@ def process_request(req):
                     ]
                 }
 
-
-
         elif action == "search_employee_emp":
             parameters = req.get("queryResult").get("parameters")
             print(parameters)
@@ -756,8 +744,6 @@ def process_request(req):
                     }
                 ]
             }
-
-
 
         elif action == "show.all.public.holidays":
             state = req.get("queryResult").get("parameters").get("geo-state")
@@ -853,39 +839,22 @@ def process_request(req):
                     ]
                 }
 
-
         elif action == "raise.ticket":
-
             query = req.get("queryResult").get("parameters").get("query")
-
             print(query)
-
             token = random.randint(1000, 9999)
-
             issue = "ISU" + str(token)
-
             # tickets.insert_one({
-
             #     "issue_no": issue,
-
             #     "token_id": tickets.count() + 1,
-
             #     "employee_id": "EMP" + str(random.randint(1000, 9999)),
-
             #     "description": query,
-
             #     "priority": "high",
-
             #     "status": "open",
-
             #     "created_date": "date",
-
             #     # "created_date": datetime.datetime.now().isoformat(),
-
             #     "due_date": "",
-
             #     "comment": "",
-
             # })
             print(tickets)
             return {
@@ -903,7 +872,6 @@ def process_request(req):
                     }
                 ]
             }
-
 
         elif action == "input.unknown":
             unknown_flag += 1
@@ -936,6 +904,29 @@ def process_request(req):
                         }
                     ]
                 }
+
+
+        elif action == "resume":
+            result = req.get("originalDetectIntentRequest").get("payload").get("data").get("message").get("attachments")[0].get("payload")
+            # resume_url = result.get("url")
+            data = ResumeParser(result).get_extracted_data()
+            return {
+                "source": "webhook",
+                "fulfillmentMessages": [
+                    {
+                        "quickReplies": {
+                            "title": "Great.Parser is working. I will notify our HR about your query, and they resolve it as soon as "
+                                     "possible.",
+                            "quickReplies": [
+                                "Get Started"
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    }
+                ]
+            }
+
+
 
     except Exception as e:
         print("Error:", e)
