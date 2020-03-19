@@ -853,35 +853,44 @@ def process_request(req):
                     ]
                 }
 
+
         elif action == "raise.ticket":
+
             query = req.get("queryResult").get("parameters").get("query")
+
             print(query)
+
             token = random.randint(1000, 9999)
+
             issue = "ISU" + str(token)
-            tickets.insert_one({
-                "issue_no": issue,
-                "token_id": tickets.count() + 1,
-                "employee_id": "EMP" + str(random.randint(1000, 9999)),
-                "description": query,
-                "priority": "high",
-                "status": "open",
-                "created_date": "date",
-                # "created_date": datetime.datetime.now().isoformat(),
-                "due_date": "",
-                "comment": "",
-            })
+
+            # tickets.insert_one({
+
+            #     "issue_no": issue,
+
+            #     "token_id": tickets.count() + 1,
+
+            #     "employee_id": "EMP" + str(random.randint(1000, 9999)),
+
+            #     "description": query,
+
+            #     "priority": "high",
+
+            #     "status": "open",
+
+            #     "created_date": "date",
+
+            #     # "created_date": datetime.datetime.now().isoformat(),
+
+            #     "due_date": "",
+
+            #     "comment": "",
+
+            # })
             print(tickets)
             return {
                 "source": "webhook",
                 "fulfillmentMessages": [
-                    {
-                        "text": {
-                            "text": [
-                                "Issue No : " + issue
-                            ]
-                        },
-                        "platform": "FACEBOOK"
-                    },
                     {
                         "quickReplies": {
                             "title": "Great. I will notify our HR about your query, and they resolve it as soon as "
@@ -894,6 +903,7 @@ def process_request(req):
                     }
                 ]
             }
+
 
         elif action == "input.unknown":
             unknown_flag += 1
