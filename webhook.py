@@ -12,7 +12,7 @@ from flask import request, make_response
 from pymongo import MongoClient
 from textblob import TextBlob
 
-from pyresparser import ResumeParser
+# from pyresparser import ResumeParser
 
 import utils
 
@@ -906,25 +906,29 @@ def process_request(req):
                 }
 
 
-        elif action == "resume":
-            result = req.get("originalDetectIntentRequest").get("payload").get("data").get("message").get("attachments")[0].get("payload")
-            # resume_url = result.get("url")
-            data = ResumeParser(result).get_extracted_data()
-            return {
-                "source": "webhook",
-                "fulfillmentMessages": [
-                    {
-                        "quickReplies": {
-                            "title": "Great.Parser is working. I will notify our HR about your query, and they resolve it as soon as "
-                                     "possible.",
-                            "quickReplies": [
-                                "Get Started"
-                            ]
-                        },
-                        "platform": "FACEBOOK"
-                    }
-                ]
-            }
+        # elif action == "resume":
+        #     result = req.get("originalDetectIntentRequest").get("payload").get("data").get("message").get("attachments")[0].get("payload")
+        #     # resume_url = result.get("url")
+        #     print("ready to parse------")
+        #     data = ResumeParser(result).get_extracted_data()
+        #     print("---------")
+        #     print(data)
+        #     print("---------")
+        #     return {
+        #         "source": "webhook",
+        #         "fulfillmentMessages": [
+        #             {
+        #                 "quickReplies": {
+        #                     "title": "Great.Parser is working. I will notify our HR about your query, and they resolve it as soon as "
+        #                              "possible.",
+        #                     "quickReplies": [
+        #                         "Get Started"
+        #                     ]
+        #                 },
+        #                 "platform": "FACEBOOK"
+        #             }
+        #         ]
+        #     }
 
 
 
