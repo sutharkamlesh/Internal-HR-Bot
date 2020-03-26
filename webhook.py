@@ -1,32 +1,41 @@
 # coding=utf-8
-import datetime
 import json
 import os
-import random
 import traceback
-from datetime import datetime
+import random
+import utils
 
-import pandas as pd
+import datetime
+from datetime import datetime
+from datetime import date
+
 from flask import Flask
+import pandas as pd
 from flask import request, make_response
 from pymongo import MongoClient
 from textblob import TextBlob
 
-# from pyresparser import ResumeParser
-
-import utils
+import math
 
 MONGODB_URI = "mongodb://uptime:Basketball10@134.122.18.134:27017/admin"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
 db = client.hrbot_database
-# MONGODB_URI = "mongodb+srv://kamlesh:techmatters123@aflatoun-quiz-pflgi.mongodb.net/test?retryWrites=true&w=majority"
-# client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
-# db = client.hrchatbot
+
 employee_details = db.employee_details
 jobs = db.Hiring_PublicJobPosition
 tickets = db.Tickets
 history = db.hrbot_history
 new_joinee = db.new_joinee
+feedbackdata = db.feedback_data
+# chck = {'employ_id': 'EMP100013'}
+#
+# contact_info = employee_details.find_one(chck)
+# print("++++++++++++++++++++++")
+# print(contact_info)
+# print("++++++++++++++++++++++")
+cursor = feedbackdata.find()
+for record in cursor:
+    print(record)
 
 # Importing Holidays data sets
 public_holidays = pd.read_csv("data/public_holidays.csv")
@@ -38,6 +47,8 @@ app = Flask(__name__)
 unknown_flag = 0
 employ_id = {}
 email = {}
+feedback = []
+feed = {}
 
 
 @app.route('/webhook', methods=['POST'])
@@ -59,9 +70,10 @@ def process_request(req):
     global unknown_flag
     global employ_id
     global email
+    global feedback
+    global feed
+    req.update({"date": datetime.date(datetime.now()).isoformat(), "time": datetime.time(datetime.now()).isoformat()})
 
-    req.update({"date": datetime.date(datetime.now()).isoformat()})
-    req.update({"time": datetime.time(datetime.now()).isoformat()})
     # req.update({"employ_id":employ_id["employ_id"]})
     # today = date.today()
     # req.update({"today date":today.strftime("%B %d, %Y")})
@@ -145,6 +157,7 @@ def process_request(req):
 
             return message
 
+
         elif action == "otp":
             otp = req.get("queryResult").get("queryText")
             print(otp)
@@ -205,6 +218,7 @@ def process_request(req):
                     ]
                 }
 
+
         elif action == "askhr":
             query = req.get("queryResult").get("parameters").get("query")
             print(query)
@@ -251,6 +265,8 @@ def process_request(req):
                 ]
             }
 
+
+
         elif action == "new_joinee":
             parameters = req.get("queryResult").get("parameters")
             print(parameters)
@@ -270,7 +286,8 @@ def process_request(req):
                 new_joinee.find_one_and_update(filtered_parameters, {"$set": {"otp": otp}}, upsert=True)
                 print(otp)
                 subject = "Qrata - Verification OTP"
-                body = "Your verification code is :- " + str(otp) + " please enter the code in the chatbot for completing your verification process"
+                body = "Your verification code is :- " + str(
+                    otp) + " please enter the code in the chatbot for completing your verification process"
                 utils.send_mail(to_email, subject, body)
                 message = {
                     "source": "webhook",
@@ -312,6 +329,28 @@ def process_request(req):
                 }
 
             return message
+
+        elif action == "feedback.score.1":
+            score1 = req.get("queryResult").get("parameters").get("number")
+            feedback.append(score1)
+            feed["score1"] = score1
+
+            print(feedback)
+
+        elif action == "feedback.score.2":
+            score2 = req.get("queryResult").get("parameters").get("number")
+            feedback.append(score2)
+            feed["score2"] = score2
+
+            print(feedback)
+        #
+        # elif action == "Feedback":
+        #     userfeedback = req.get("queryResult").get("parameters").get("feedback")
+        #     # print(userfeedback)
+        #
+        #     # print(feedback)
+        #     # print("****************************************************************************************************************************************")
+        #     # print(feedback)
 
         elif action == "newjoinee.otp":
             otp = req.get("queryResult").get("queryText")
@@ -398,6 +437,11 @@ def process_request(req):
                     ]
                 }
 
+
+
+
+
+
         elif action == "remaining_leaves":
             if employ_id:
                 contact_info = employee_details.find_one(employ_id)
@@ -453,6 +497,7 @@ def process_request(req):
                     ]
                 }
 
+
         elif action == "request.leave":
             date_string = req.get("queryResult").get("parameters").get("date")
             return {
@@ -479,7 +524,6 @@ def process_request(req):
                     }
                 ]
             }
-
         elif action == "request.vacation":
             start_date = req.get("queryResult").get("parameters").get("date-period").get("startDate")
             end_date = req.get("queryResult").get("parameters").get("date-period").get("endDate")
@@ -592,17 +636,26 @@ def process_request(req):
                 ]
             }
 
+
+
         # elif action == "remaining_leaves":
 
-        elif action == "Feedback.Feedback-custom":
-            feedback = req.get("queryResult").get("parameters").get('feedback')
-            text = TextBlob(feedback)
+        elif action == "Feedback":
+            userfeedback = req.get("queryResult").get("parameters").get('feedback')
+
+            feedback.append(userfeedback)
+            feed["feedback"] = userfeedback
+            feedbackdata.insert_one(feed)
+            print(feed)
+            text = TextBlob(userfeedback)
             sentiment = text.sentiment.polarity
             subjective = text.sentiment.subjectivity
+            feed.clear()
+            feedback.clear()
 
-            if sentiment >= 0.15 or feedback == "🙂":
+            if sentiment >= 0.15 or userfeedback == "🙂":
                 message = u"\U0001F600 " + f"We are glad that you like our culture."
-            elif sentiment <= -0.15 or feedback == "☹️":
+            elif sentiment <= -0.15 or userfeedback == "☹️":
                 message = "Sorry to hear that. We will make sure to improve our culture and make this " \
                           "a better place to work."
             else:
@@ -695,6 +748,8 @@ def process_request(req):
                     ]
                 }
 
+
+
         elif action == "search_employee_emp":
             parameters = req.get("queryResult").get("parameters")
             print(parameters)
@@ -744,6 +799,8 @@ def process_request(req):
                     }
                 ]
             }
+
+
 
         elif action == "show.all.public.holidays":
             state = req.get("queryResult").get("parameters").get("geo-state")
@@ -844,22 +901,30 @@ def process_request(req):
             print(query)
             token = random.randint(1000, 9999)
             issue = "ISU" + str(token)
-            # tickets.insert_one({
-            #     "issue_no": issue,
-            #     "token_id": tickets.count() + 1,
-            #     "employee_id": "EMP" + str(random.randint(1000, 9999)),
-            #     "description": query,
-            #     "priority": "high",
-            #     "status": "open",
-            #     "created_date": "date",
-            #     # "created_date": datetime.datetime.now().isoformat(),
-            #     "due_date": "",
-            #     "comment": "",
-            # })
+            tickets.insert_one({
+                "issue_no": issue,
+                "token_id": tickets.count() + 1,
+                "employee_id": "EMP" + str(random.randint(1000, 9999)),
+                "description": query,
+                "priority": "high",
+                "status": "open",
+                "created_date": "date",
+                # "created_date": datetime.datetime.now().isoformat(),
+                "due_date": "",
+                "comment": "",
+            })
             print(tickets)
             return {
                 "source": "webhook",
                 "fulfillmentMessages": [
+                    {
+                        "text": {
+                            "text": [
+                                "Issue No : " + issue
+                            ]
+                        },
+                        "platform": "FACEBOOK"
+                    },
                     {
                         "quickReplies": {
                             "title": "Great. I will notify our HR about your query, and they resolve it as soon as "
@@ -904,33 +969,6 @@ def process_request(req):
                         }
                     ]
                 }
-
-
-        # elif action == "resume":
-        #     result = req.get("originalDetectIntentRequest").get("payload").get("data").get("message").get("attachments")[0].get("payload")
-        #     # resume_url = result.get("url")
-        #     print("ready to parse------")
-        #     data = ResumeParser(result).get_extracted_data()
-        #     print("---------")
-        #     print(data)
-        #     print("---------")
-        #     return {
-        #         "source": "webhook",
-        #         "fulfillmentMessages": [
-        #             {
-        #                 "quickReplies": {
-        #                     "title": "Great.Parser is working. I will notify our HR about your query, and they resolve it as soon as "
-        #                              "possible.",
-        #                     "quickReplies": [
-        #                         "Get Started"
-        #                     ]
-        #                 },
-        #                 "platform": "FACEBOOK"
-        #             }
-        #         ]
-        #     }
-
-
 
     except Exception as e:
         print("Error:", e)
