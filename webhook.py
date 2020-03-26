@@ -644,7 +644,9 @@ def process_request(req):
             userfeedback = req.get("queryResult").get("parameters").get('feedback')
 
             feedback.append(userfeedback)
+            time = datetime.now()
             feed["feedback"] = userfeedback
+            feed["time"] = time
             feedbackdata.insert_one(feed)
             print(feed)
             text = TextBlob(userfeedback)
@@ -799,8 +801,6 @@ def process_request(req):
                     }
                 ]
             }
-
-
 
         elif action == "show.all.public.holidays":
             state = req.get("queryResult").get("parameters").get("geo-state")
