@@ -4,6 +4,8 @@ import os
 import traceback
 import random
 import utils
+import calendar
+import time
 
 import datetime
 from datetime import datetime
@@ -16,6 +18,8 @@ from pymongo import MongoClient
 from textblob import TextBlob
 
 import math
+
+
 
 MONGODB_URI = "mongodb://uptime:Basketball10@134.122.18.134:27017/admin"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
@@ -33,9 +37,9 @@ feedbackdata = db.feedback_data
 # print("++++++++++++++++++++++")
 # print(contact_info)
 # print("++++++++++++++++++++++")
-cursor = feedbackdata.find()
-for record in cursor:
-    print(record)
+# cursor = feedbackdata.find()
+# for record in cursor:
+#     print(record)
 
 # Importing Holidays data sets
 public_holidays = pd.read_csv("data/public_holidays.csv")
@@ -88,7 +92,7 @@ def process_request(req):
         pass
     try:
         action = req.get("queryResult").get("action")
-
+        knowledge = req.get('queryResult').get('intent').get('displayName')
         if action == "input.welcome":
             print("Webhook Successfully connected.")
 
@@ -218,9 +222,26 @@ def process_request(req):
                     ]
                 }
 
+        elif "Knowledge.KnowledgeBase" in knowledge:
+            answer = (req.get('queryResult').get('fulfillmentMessages'))
+
+            return {
+                "source": "webhook",
+                "fulfillmentMessages": answer,
+                "outputContexts": [
+                    {
+                        "name": "projects/hr-bot-2-0-qfiwte/agent/sessions/8361885c-2b57-509c-c8b4-a86057fac036/contexts/existingemployee",
+                        "lifespanCount": 1,
+                        "parameters": {
+                            "number": 1234,
+                            "number.original": "1234"
+                        }
+                    }
+                ]
+            }
 
         elif action == "askhr":
-            query = req.get("queryResult").get("parameters").get("query")
+            query = req .get("queryResult").get("parameters").get("query")
             print(query)
             token = random.randint(1000, 9999)
             issue = "ISU" + str(token)
@@ -286,8 +307,7 @@ def process_request(req):
                 new_joinee.find_one_and_update(filtered_parameters, {"$set": {"otp": otp}}, upsert=True)
                 print(otp)
                 subject = "Qrata - Verification OTP"
-                body = "Your verification code is :- " + str(
-                    otp) + " please enter the code in the chatbot for completing your verification process"
+                body = "Your verification code is :- " + str(otp) + " please enter the code in the chatbot for completing your verification process"
                 utils.send_mail(to_email, subject, body)
                 message = {
                     "source": "webhook",
@@ -436,10 +456,6 @@ def process_request(req):
                         }
                     ]
                 }
-
-
-
-
 
 
         elif action == "remaining_leaves":
@@ -644,24 +660,36 @@ def process_request(req):
             userfeedback = req.get("queryResult").get("parameters").get('feedback')
 
             feedback.append(userfeedback)
-            time = datetime.now()
+            timec = datetime.date(datetime.now()).isoformat()
             feed["feedback"] = userfeedback
-            feed["time"] = time
-            feedbackdata.insert_one(feed)
+            ts = calendar.timegm(time.gmtime())
+            feed["time"] = str(timec)
+            feed["timestamp"] = ts
             print(feed)
             text = TextBlob(userfeedback)
             sentiment = text.sentiment.polarity
             subjective = text.sentiment.subjectivity
-            feed.clear()
             feedback.clear()
-
+            print(subjective)
             if sentiment >= 0.15 or userfeedback == "🙂":
+                feed["sentiment"] = "positive"
+                feedbackdata.insert_one(feed)
+                print(feed)
                 message = u"\U0001F600 " + f"We are glad that you like our culture."
+                feed.clear()
             elif sentiment <= -0.15 or userfeedback == "☹️":
+                feed["sentiment"] = "negative"
+                feedbackdata.insert_one(feed)
+                print(feed)
+
                 message = "Sorry to hear that. We will make sure to improve our culture and make this " \
                           "a better place to work."
+                feed.clear()
             else:
+                feed["sentiment"] = "positive"
+                feedbackdata.insert_one(feed)
                 message = "Alright, I have noted the feedback."
+                feed.clear()
 
             return {
                 "source": "webhook",
@@ -802,6 +830,8 @@ def process_request(req):
                 ]
             }
 
+
+
         elif action == "show.all.public.holidays":
             state = req.get("queryResult").get("parameters").get("geo-state")
             public_holidays_string = public_holidays[public_holidays["State"] == state].to_string(
@@ -830,6 +860,8 @@ def process_request(req):
                     }
                 ]
             }
+
+
 
         elif action == "show.all.jobs":
             jobs_search = jobs.find({"statusVisible": "enum.Hiring_JobPositionStatusVisible.Public"}).limit(10)
