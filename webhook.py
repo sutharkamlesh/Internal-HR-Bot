@@ -16,10 +16,8 @@ import pandas as pd
 from flask import request, make_response
 from pymongo import MongoClient
 from textblob import TextBlob
-
+import source
 import math
-
-
 
 MONGODB_URI = "mongodb://uptime:Basketball10@134.122.18.134:27017/admin"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
@@ -31,6 +29,7 @@ tickets = db.Tickets
 history = db.hrbot_history
 new_joinee = db.new_joinee
 feedbackdata = db.feedback_data
+survey = db.survey
 # chck = {'employ_id': 'EMP100013'}
 #
 # contact_info = employee_details.find_one(chck)
@@ -53,6 +52,7 @@ employ_id = {}
 email = {}
 feedback = []
 feed = {}
+survey_details = {}
 
 
 @app.route('/webhook', methods=['POST'])
@@ -74,7 +74,7 @@ def process_request(req):
     global unknown_flag
     global employ_id
     global email
-    global feedback
+    global feedback, survey_details
     global feed
     req.update({"date": datetime.date(datetime.now()).isoformat(), "time": datetime.time(datetime.now()).isoformat()})
 
@@ -240,8 +240,60 @@ def process_request(req):
                 ]
             }
 
+        for i in range(0, 5):
+            question, op1, op2, op3, op4, op5, ans, option, hint1, hint2, hint3, hint4, hint5, quest = source.data(i)
+
+            if action == "question" + str(i + 1):
+                answer = req.get("queryResult").get("parameters").get("ans")
+                data = {"question" + str(i): answer}
+                survey_details.update(data)
+                # survey_details.pop("question0")
+
+                print(survey_details)
+
+                # calling first question
+                return {
+                    "fulfillmentText": "This is a text response",
+                    "fulfillmentMessages": [
+                        # {
+                        #     "card": {
+                        #         "title": quest,
+                        #     }
+                        # },
+                        {
+                            "text": {
+                                "text": [
+                                    quest
+                                ]
+                            }
+                        },
+                        {
+                            "quickReplies": {
+                                "quickReplies": [
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5"
+                                ]
+                            }
+                        },
+
+                    ]
+                }
+
+        if action == "completed":
+            answer = req.get("queryResult").get("parameters").get("ans")
+            data = {"question5": answer}
+            survey_details.update(data)
+            print(survey_details)
+            survey_details.pop("question0")
+            survey.insert(survey_details)
+            print(survey_details)
+            survey_details = {}
+
         elif action == "askhr":
-            query = req .get("queryResult").get("parameters").get("query")
+            query = req.get("queryResult").get("parameters").get("query")
             print(query)
             token = random.randint(1000, 9999)
             issue = "ISU" + str(token)
@@ -307,7 +359,8 @@ def process_request(req):
                 new_joinee.find_one_and_update(filtered_parameters, {"$set": {"otp": otp}}, upsert=True)
                 print(otp)
                 subject = "Qrata - Verification OTP"
-                body = "Your verification code is :- " + str(otp) + " please enter the code in the chatbot for completing your verification process"
+                body = "Your verification code is :- " + str(
+                    otp) + " please enter the code in the chatbot for completing your verification process"
                 utils.send_mail(to_email, subject, body)
                 message = {
                     "source": "webhook",
@@ -456,6 +509,10 @@ def process_request(req):
                         }
                     ]
                 }
+
+
+
+
 
 
         elif action == "remaining_leaves":
