@@ -1,24 +1,22 @@
 # coding=utf-8
+import calendar
+import datetime
 import json
 import os
-import traceback
 import random
-import utils
-import calendar
 import time
-import requests
-
-import datetime
+import traceback
 from datetime import datetime
-from datetime import date
 
-from flask import Flask
 import pandas as pd
+import requests
+from flask import Flask
 from flask import request, make_response
 from pymongo import MongoClient
 from textblob import TextBlob
+
 import source
-import math
+import utils
 
 MONGODB_URI = "mongodb://uptime:Basketball10@134.122.18.134:27017/admin"
 client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
