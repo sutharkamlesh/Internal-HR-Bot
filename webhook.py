@@ -6,6 +6,7 @@ import random
 import utils
 import calendar
 import time
+import requests
 
 import datetime
 from datetime import datetime
@@ -57,6 +58,7 @@ survey_details = {}
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
+
     req = request.get_json(silent=True, force=True)
     print("Request Header: ", request.headers)
     if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
@@ -71,6 +73,9 @@ def webhook():
 
 
 def process_request(req):
+    # For session
+    s = requests.Session()
+
     global unknown_flag
     global employ_id
     global email
@@ -100,6 +105,16 @@ def process_request(req):
             parameters = req.get("queryResult").get("parameters")
             parameters["employ_id"] = parameters["employ_id"].upper()
             print(parameters)
+
+            #For session
+            print("------------")
+            setcookiesurl = "http://httpbin.org/cookies/set"
+            getcookiesurl = "http://httpbin.org/cookies"
+            s.get(setcookiesurl, params=parameters)
+            r = s.get(getcookiesurl)
+            print(r.text)
+            print("------------")
+
             filtered_parameters = {key: val for key, val in parameters.items()
                                    if val != ''}  # Removing empty parameters
             print(filtered_parameters)
