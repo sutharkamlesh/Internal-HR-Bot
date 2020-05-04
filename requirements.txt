@@ -31,8 +31,6 @@ jedi==0.15.1
 Jinja2==2.10.1
 jsonschema==3.2.0
 MarkupSafe==1.1.1
-mkl-random==1.1.0
-mkl-service==2.3.0
 murmurhash==1.0.2
 nltk==3.4.5
 numpy==1.17.3
