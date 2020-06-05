@@ -9,7 +9,6 @@ import traceback
 from datetime import datetime
 
 import pandas as pd
-import requests
 from flask import Flask
 from flask import request, make_response
 from pymongo import MongoClient
@@ -70,9 +69,48 @@ def webhook():
     return r
 
 
+import argparse
+import uuid
+project_id="internal-hr-bot-womtev "
+texts="hi"
+
+def detect_intent_texts(project_id, session_id, texts, language_code):
+    """Returns the result of detect intent with texts as inputs.
+    Using the same `session_id` between requests allows continuation
+    of the conversation."""
+    import dialogflow_v2 as dialogflow
+    session_client = dialogflow.SessionsClient()
+
+    session = session_client.session_path(project_id, session_id)
+    print('Session path: {}\n'.format(session))
+
+    for text in texts:
+        text_input = dialogflow.types.TextInput(
+            text=text, language_code=language_code)
+
+        query_input = dialogflow.types.QueryInput(text=text_input)
+
+        response = session_client.detect_intent(
+            session=session, query_input=query_input)
+
+        print('=' * 20)
+        print('Query text: {}'.format(response.query_result.query_text))
+        print('Detected intent: {} (confidence: {})\n'.format(
+            response.query_result.intent.display_name,
+            response.query_result.intent_detection_confidence))
+        print('Fulfillment text: {}\n'.format(
+            response.query_result.fulfillment_text))
+
+
 def process_request(req):
+
+    # --------------------------
     # For session
-    s = requests.Session()
+    # s = requests.Session()
+
+    # ---------------------------
+
+
 
     global unknown_flag
     global employ_id
@@ -90,6 +128,7 @@ def process_request(req):
     req.update({"timestamp": timestamp1})
 
     try:
+        # planUS.insert(req, check_keys=False)
         history.insert(req, check_keys=False)
     except:
         pass
@@ -104,14 +143,15 @@ def process_request(req):
             parameters["employ_id"] = parameters["employ_id"].upper()
             print(parameters)
 
-            #For session
-            print("------------")
-            setcookiesurl = "http://httpbin.org/cookies/set"
-            getcookiesurl = "http://httpbin.org/cookies"
-            s.get(setcookiesurl, params=parameters)
-            r = s.get(getcookiesurl)
-            print(r.text)
-            print("------------")
+            #For session----------------------------
+            # print("------------")
+            # setcookiesurl = "http://httpbin.org/cookies/set"
+            # getcookiesurl = "http://httpbin.org/cookies"
+            # s.get(setcookiesurl, params=parameters)
+            # r = s.get(getcookiesurl)
+            # print(r.text)
+            # print("------------")
+            # --------------------------------------------
 
             filtered_parameters = {key: val for key, val in parameters.items()
                                    if val != ''}  # Removing empty parameters
@@ -1106,3 +1146,28 @@ if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     print("Starting app on port {}".format(port))
     app.run(debug=True, port=port, host='0.0.0.0')
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument(
+        '--project-id',
+        help='Project/agent id.  Required.',
+        required=True)
+    parser.add_argument(
+        '--session-id',
+        help='Identifier of the DetectIntent session. '
+             'Defaults to a random UUID.',
+        default=str(uuid.uuid4()))
+    parser.add_argument(
+        '--language-code',
+        help='Language code of the query. Defaults to "en-US".',
+        default='en-US')
+    parser.add_argument(
+        'texts',
+        nargs='+',
+        type=str,
+        help='Text inputs.')
+
+    args = parser.parse_args()
+
+    detect_intent_texts(args.project_id, args.session_id, args.texts, args.language_code)

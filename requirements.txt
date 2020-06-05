@@ -2,6 +2,8 @@ asn1crypto==1.2.0
 attrs==19.3.0
 backcall==0.1.0
 blis==0.4.1
+boto3==1.13.3
+botocore==1.16.3
 cachetools==3.1.1
 catalogue==1.0.0
 certifi==2019.6.16
@@ -31,6 +33,9 @@ jedi==0.15.1
 Jinja2==2.10.1
 jsonschema==3.2.0
 MarkupSafe==1.1.1
+mkl-fft==1.0.15
+mkl-random==1.1.0
+mkl-service==2.3.0
 murmurhash==1.0.2
 nltk==3.4.5
 numpy==1.17.3
@@ -48,6 +53,7 @@ pyasn1==0.4.6
 pyasn1-modules==0.2.6
 pycparser==2.19
 pycryptodome==3.9.7
+pygame==1.9.6
 Pygments==2.4.2
 pymongo==3.8.0
 pyOpenSSL==19.0.0
